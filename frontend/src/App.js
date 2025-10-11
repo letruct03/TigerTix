@@ -16,7 +16,7 @@ function App() {
   const purchaseTicket = (eventName) => {
     fetch('http://localhost:5000/api/events/:id/purchase',
     {
-      method: "POST",
+      method: "POST", 
     })
       .then((res) => res.json())
       .then((data) => setEvents(data))
