@@ -17,7 +17,12 @@ function App() {
     fetch('http://localhost:5000/api/events/:id/purchase',
     {
       method: "POST", 
+      body: JSON.stringify({
+        eventName: eventName
+      }),
+
     })
+    alert("Ticket Successfully Purchased")
       .then((res) => res.json())
       .then((data) => setEvents(data))
       .catch((err) => console.error(err));
