@@ -15,8 +15,8 @@ app.use('/api/events', clientRoutes);
 app.get('health',(req, res) => {
     res.json({
         status: 'OK',
-        service: 'client-service'
-        timestamp: new Date().toISOString;
+        service: 'client-service',
+        timestamp: new Date().toISOString()
     });
 });
 
