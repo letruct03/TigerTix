@@ -5,24 +5,42 @@ function App() {
   const [events, setEvents] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/events')
-      .then((response) => response.json())
-      .then((data) => setEvents(data))
-      .catch((err) => console.error(err));
-    }, []);
+    fetch('http://localhost:6001/api/events')
+      .then(response => response.json())
+      .then(data => {
+        console.log("Fetched events:", data);
+        if (Array.isArray(data)) setEvents(data);
+        else if (Array.isArray(data.data)) setEvents(data.data);
+      })
+      .catch(err => console.error("Error fetching events:", err));
+  }, []);
 
-  const getTicket = (eventID) => {
-    fetch('http://localhost:5000/api/events/:id/purchase',
+  const getTicket = (id) => {
+    fetch(`http://localhost:6001/api/events/${id}/purchase`,
     {
       method: "POST", 
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        eventId: eventID
+        eventID: id
       }),
       
     })
-    alert(`Ticket Successfully Purchased for event ${eventID}`)
-      .catch((err) => console.error(err));
-  };
+    .then((res) => {
+      console.log("Fetch response status:", res.status);
+      if (!res.ok) {
+        throw new Error(`Failed to purchase ticket. Status: ${res.status}`);
+      }
+      return res.json();
+    })
+    .then((data) => {
+      console.log("Server response:", data);
+      alert(`Ticket successfully purchased for event ${id}!`);
+    })
+    .catch((err) => {
+      console.error("Error purchasing ticket:", err);
+      alert("Could not purchase ticket. Please try again.");
+    });
+};
 
   return (
     <div className="App">
@@ -30,8 +48,9 @@ function App() {
       <ul>
         {events.map((event) => (
           <li key={event.id}>
-            {event.name} - {event.date}{' '}
-            <button aria-label="Purchase Ticket" onClick={() => getTicket(event.id)}>Purchase</button>
+            <p>{event.name} - {event.date}{' '}</p>
+            <button aria-label="Purchase Ticket" aria-live='polite' 
+              onClick={() => getTicket(event.id)}>Purchase</button>
           </li>
         ))}
       </ul>
