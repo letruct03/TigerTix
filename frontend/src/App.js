@@ -5,23 +5,22 @@ function App() {
   const [events, setEvents] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/events')
-      .then((response) => response.json())
-      .then((data) => console.log(data))
-      .then((data) => setEvents(data))
-      .catch((err) => console.error(err));
+    fetch('http://localhost:6001/api/events')
+      .then(response => response.json())
+      .then(data => setEvents(data))
+      .then(data => console.log(data));
     }, []);
 
-  const getTicket = (eventID) => {
-    fetch('http://localhost:5000/api/events/:id/purchase',
+  const getTicket = (id) => {
+    fetch('http://localhost:6001/api/events/:id/purchase',
     {
       method: "POST", 
       body: JSON.stringify({
-        eventID: eventID
+        eventID: id
       }),
       
     })
-    alert(`Ticket Successfully Purchased for event ${eventID}`)
+    alert(`Ticket Successfully Purchased for event ${id}`)
       .catch((err) => console.error(err));
   };
 
@@ -31,8 +30,9 @@ function App() {
       <ul>
         {events.map((event) => (
           <li key={event.id}>
-            {event.name} - {event.date}{' '}
-            <button aria-label="Purchase Ticket" onClick={() => getTicket(event.id)}>Purchase</button>
+            <p>{event.name} - {event.date}{' '}</p>
+            <button aria-label="Purchase Ticket" aria-live='polite' 
+              onClick={() => getTicket(event.id)}>Purchase</button>
           </li>
         ))}
       </ul>
