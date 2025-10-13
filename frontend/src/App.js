@@ -5,26 +5,22 @@ function App() {
   const [events, setEvents] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/events', {
-      method: "GET",
-    })
-      .then((res) => res.json())
+    fetch('http://localhost:5000/api/events')
+      .then((response) => response.json())
       .then((data) => setEvents(data))
       .catch((err) => console.error(err));
     }, []);
 
-  const purchaseTicket = (eventName) => {
+  const getTicket = (eventID) => {
     fetch('http://localhost:5000/api/events/:id/purchase',
     {
       method: "POST", 
       body: JSON.stringify({
-        eventName: eventName
+        eventId: eventID
       }),
-
+      
     })
-    alert("Ticket Successfully Purchased")
-      .then((res) => res.json())
-      .then((data) => setEvents(data))
+    alert(`Ticket Successfully Purchased for event ${eventID}`)
       .catch((err) => console.error(err));
   };
 
@@ -35,7 +31,7 @@ function App() {
         {events.map((event) => (
           <li key={event.id}>
             {event.name} - {event.date}{' '}
-            <button onClick={() => purchaseTicket(event.name)}>Buy Ticket</button>
+            <button aria-label="Purchase Ticket" onClick={() => getTicket(event.id)}>Purchase</button>
           </li>
         ))}
       </ul>
