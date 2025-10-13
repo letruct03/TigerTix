@@ -41,6 +41,6 @@ app.use((req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`Client service running on port ${PORT}`);
-    console.log(`Visit http://localhost:${PORT}/api/events to see all events`);
+    console.log('Client service running on port ${PORT}');
+    console.log('Visit http://localhost:${PORT}/api/events to see all events');
 });

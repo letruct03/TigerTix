@@ -23,8 +23,8 @@ class clientController{
     // POST request to purchase a ticket
     async purchaseTicket(req,res){
         try{
-            const eventId = req.params.id;
-            if(!eventId){
+            const eventID = req.params.id;
+            if(!eventID){
                 return res.status(400).json({
                     success: false,
                     error: "Event ID is required"
