@@ -7,6 +7,7 @@ function App() {
   useEffect(() => {
     fetch('http://localhost:5000/api/events')
       .then((response) => response.json())
+      .then((data) => console.log(data))
       .then((data) => setEvents(data))
       .catch((err) => console.error(err));
     }, []);
@@ -16,7 +17,7 @@ function App() {
     {
       method: "POST", 
       body: JSON.stringify({
-        eventId: eventID
+        eventID: eventID
       }),
       
     })
