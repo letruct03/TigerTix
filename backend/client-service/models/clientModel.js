@@ -53,9 +53,7 @@ class clientModel{
                         reject(new Error('Event not found'));
                         return;
                     }
-                    clientModel.getEventByID(eventID)
-                        .then(updatedEvent => resolve(updatedEvent))
-                        .catch(err => reject(err));
+                    resolve({ message: 'Ticket purchased successfully' });
                 });
             });
         });
