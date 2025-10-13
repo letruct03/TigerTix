@@ -3,6 +3,11 @@ const path = require('path');
 
 const dbPath = path.join(__dirname, '../../shared-db/database.sqlite');
 
+
+/**
+ * Get database connection
+ * @returns SQLite database connection
+ */
 const db = new sqlite3.Database(dbPath, (err) => {
     if (err){
         console.error("Error opening database:", err.message);
@@ -14,6 +19,10 @@ const db = new sqlite3.Database(dbPath, (err) => {
 
 
 class clientModel{
+    /**
+     * Returns all events to the frontend
+     * @returns {Promise} - to the controller that is either an err or the rows of the events to work with
+     */
     static getAllEvents(){
         return new Promise((resolve, reject) => {
             const eventDB = 'SELECT * FROM events ORDER BY date ASC'
@@ -28,6 +37,12 @@ class clientModel{
             });
         });
     }
+
+    /**
+     * Purchases a ticket and updates the events to decrease the availabe tickets by 1 
+     * @param {eventID} - the ID of the event that you are purchasing a ticket for 
+     * @returns {Promise} - either the updated event and successs message or an error in getting the event.
+     */
     static purchaseTicket(eventID){
         return new Promise((resolve, reject) => {
             const eventDB = 'SELECT available_tickets FROM events WHERE id = ?';
