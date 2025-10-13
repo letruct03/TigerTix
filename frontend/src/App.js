@@ -6,13 +6,22 @@ function App() {
 
   useEffect(() => {
     fetch('http://localhost:5000/api/events')
-      .then((res) => res.json())
+      .then((response) => response.json())
       .then((data) => setEvents(data))
       .catch((err) => console.error(err));
     }, []);
 
-  const buyTicket = (eventName) => {
-    alert(`Ticket purchased for: ${eventName}`);
+  const getTicket = (eventID) => {
+    fetch('http://localhost:5000/api/events/:id/purchase',
+    {
+      method: "POST", 
+      body: JSON.stringify({
+        eventId: eventID
+      }),
+      
+    })
+    alert(`Ticket Successfully Purchased for event ${eventID}`)
+      .catch((err) => console.error(err));
   };
 
   return (
@@ -22,7 +31,7 @@ function App() {
         {events.map((event) => (
           <li key={event.id}>
             {event.name} - {event.date}{' '}
-            <button onClick={() => buyTicket(event.name)}>Buy Ticket</button>
+            <button aria-label="Purchase Ticket" onClick={() => getTicket(event.id)}>Purchase</button>
           </li>
         ))}
       </ul>
