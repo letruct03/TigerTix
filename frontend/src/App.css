@@ -1,38 +1,338 @@
+/**
+ * App.css - Main application styles
+ * Updated with improved accessibility and design
+ */
+
+ * {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 .App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
   min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   display: flex;
   flex-direction: column;
-  align-items: center;
+}
+
+/* Header */
+.App-header {
+  background: linear-gradient(135deg, #522d80 0%, #f66d0c 100%);
+  color: white;
+  padding: 30px 20px;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.App-header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.subtitle {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  font-weight: 400;
+}
+
+/* View Toggle */
+.view-toggle {
+  display: flex;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
+  gap: 15px;
+  padding: 20px;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.view-toggle button {
+  padding: 12px 30px;
+  font-size: 16px;
+  font-weight: 600;
+  border: 2px solid #522d80;
+  background: white;
+  color: #522d80;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.view-toggle button:hover {
+  background: #f5f5f5;
+  transform: translateY(-2px);
+}
+
+.view-toggle button.active {
+  background: #522d80;
   color: white;
 }
 
-.App-link {
-  color: #61dafb;
+.view-toggle button:focus {
+  outline: 3px solid #f66d0c;
+  outline-offset: 2px;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+/* Main Content */
+main {
+  flex: 1;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Events List */
+.events-list {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.events-list h2 {
+  color: #522d80;
+  margin-bottom: 20px;
+  font-size: 2rem;
+}
+
+.events-list ul {
+  list-style: none;
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+.event-card {
+  background: #f9f9f9;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.event-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  border-color: #f66d0c;
+}
+
+.event-card:focus-within {
+  outline: 3px solid #f66d0c;
+  outline-offset: 2px;
+}
+
+.event-info h3 {
+  color: #522d80;
+  margin-bottom: 10px;
+  font-size: 1.3rem;
+}
+
+.event-date,
+.event-location,
+.event-description {
+  margin: 8px 0;
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.event-description {
+  line-height: 1.5;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.event-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #e0e0e0;
+  font-weight: 600;
+}
+
+.event-price {
+  color: #28a745;
+  font-size: 1.1rem;
+}
+
+.event-tickets {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.event-card button {
+  margin-top: 15px;
+  padding: 12px 24px;
+  background: #f66d0c;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.event-card button:hover:not(:disabled) {
+  background: #e55a00;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(246, 109, 12, 0.3);
+}
+
+.event-card button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.event-card button.sold-out {
+  background: #dc3545;
+}
+
+.event-card button:focus {
+  outline: 3px solid #522d80;
+  outline-offset: 2px;
+}
+
+.no-events {
+  text-align: center;
+  color: #666;
+  font-size: 1.2rem;
+  padding: 40px;
+}
+
+/* Footer */
+.App-footer {
+  background: #2c2c2c;
+  color: white;
+  text-align: center;
+  padding: 20px;
+  margin-top: auto;
+}
+
+.App-footer p {
+  margin: 5px 0;
+}
+
+.sprint-info {
+  font-size: 0.9rem;
+  opacity: 0.7;
+}
+
+/* Accessibility Features */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
-  to {
-    transform: rotate(360deg);
+  
+  .event-card:hover,
+  .view-toggle button:hover,
+  .event-card button:hover {
+    transform: none;
+  }
+}
+
+@media (prefers-contrast: high) {
+  .event-card {
+    border-width: 3px;
+  }
+  
+  .view-toggle button {
+    border-width: 3px;
+  }
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .App-header h1 {
+    font-size: 1.8rem;
+  }
+  
+  .subtitle {
+    font-size: 0.95rem;
+  }
+  
+  .view-toggle {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .view-toggle button {
+    width: 100%;
+  }
+  
+  .events-list {
+    padding: 20px;
+  }
+  
+  .events-list h2 {
+    font-size: 1.5rem;
+  }
+  
+  .events-list ul {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .App-header {
+    padding: 20px 15px;
+  }
+  
+  .App-header h1 {
+    font-size: 1.5rem;
+  }
+  
+  main {
+    padding: 15px;
+  }
+  
+  .events-list {
+    padding: 15px;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .App {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  }
+  
+  .events-list {
+    background: #2c2c2c;
+    color: #e0e0e0;
+  }
+  
+  .events-list h2 {
+    color: #f66d0c;
+  }
+  
+  .event-card {
+    background: #3a3a3a;
+    border-color: #555;
+  }
+  
+  .event-info h3 {
+    color: #f66d0c;
+  }
+  
+  .event-date,
+  .event-location,
+  .event-description,
+  .event-tickets {
+    color: #b0b0b0;
+  }
+  
+  .no-events {
+    color: #b0b0b0;
   }
 }
