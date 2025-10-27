@@ -5,15 +5,42 @@ function App() {
   const [events, setEvents] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/events')
-      .then((res) => res.json())
-      .then((data) => setEvents(data))
-      .catch((err) => console.error(err));
-    }, []);
+    fetch('http://localhost:6001/api/events')
+      .then(response => response.json())
+      .then(data => {
+        console.log("Fetched events:", data);
+        if (Array.isArray(data)) setEvents(data);
+        else if (Array.isArray(data.data)) setEvents(data.data);
+      })
+      .catch(err => console.error("Error fetching events:", err));
+  }, []);
 
-  const buyTicket = (eventName) => {
-    alert(`Ticket purchased for: ${eventName}`);
-  };
+  const getTicket = (id) => {
+    fetch(`http://localhost:6001/api/events/${id}/purchase`,
+    {
+      method: "POST", 
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        eventID: id
+      }),
+      
+    })
+    .then((res) => {
+      console.log("Fetch response status:", res.status);
+      if (!res.ok) {
+        throw new Error(`Failed to purchase ticket. Status: ${res.status}`);
+      }
+      return res.json();
+    })
+    .then((data) => {
+      console.log("Server response:", data);
+      alert(`Ticket successfully purchased for event ${id}!`);
+    })
+    .catch((err) => {
+      console.error("Error purchasing ticket:", err);
+      alert("Could not purchase ticket. Please try again.");
+    });
+};
 
   return (
     <div className="App">
@@ -21,8 +48,9 @@ function App() {
       <ul>
         {events.map((event) => (
           <li key={event.id}>
-            {event.name} - {event.date}{' '}
-            <button onClick={() => buyTicket(event.name)}>Buy Ticket</button>
+            <p>{event.name} - {event.date}{' '}</p>
+            <button aria-label="Purchase Ticket" aria-live='polite' 
+              onClick={() => getTicket(event.id)}>Purchase</button>
           </li>
         ))}
       </ul>
