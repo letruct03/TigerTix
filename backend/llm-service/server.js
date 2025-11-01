@@ -6,6 +6,7 @@
 const express = require('express');
 const cors = require('cors');
 const llmRoutes = require('./routes/llmRoutes');
+require('dotenv').config()
 
 const app = express();
 const PORT = process.env.PORT || 7001;

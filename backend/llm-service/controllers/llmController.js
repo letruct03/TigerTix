@@ -3,13 +3,14 @@
  * Handles input for ticket booking
  */
 
-const Anthropic = require('@anthropic-ai/sdk');
+const OpenAI = require("openai");
 const llmModel = require('../models/llmModel');
+require('dotenv').config();
+
 
 /* Initialize client */
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY || '',
-});
+
+const openai = new OpenAI({ apiKey: "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" });
 
 /* Parse input and extract booking intent */
 const parseBookingIntent = async (req, res) => {
@@ -24,16 +25,16 @@ const parseBookingIntent = async (req, res) => {
     }
 
     /* Check for keyword-based fallback first */
-    const fallbackResult = keywordFallback(message);
+    const fallbackResult = await keywordFallback(message);
     if (fallbackResult) {
       return res.status(200).json(fallbackResult);
     }
 
     /* If no API key, return error */
-    if (!process.env.ANTHROPIC_API_KEY) {
+    if (!openai.apiKey && !process.env.OPENAI_API_KEY) {
       return res.status(500).json({
         success: false,
-        error: 'LLM service not configured. Please set ANTHROPIC_API_KEY environment variable.',
+        error: 'LLM service not configured. Please set OPENAI_API_KEY environment variable.',
         fallback: 'Use commands like: "show events", "book 2 tickets for [event name]", "list events"'
       });
     }
@@ -76,20 +77,17 @@ Rules:
 - Be friendly and concise`;
 
     /* Call API */
-    const response = await anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
-      max_tokens: 1024,
-      system: systemPrompt,
+     const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
       messages: [
-        {
-          role: 'user',
-          content: message
-        }
-      ]
-    });
+       { role: "system", content: systemPrompt },
+       { role: "user", content: message }
+      ],
+      max_tokens: 1024
+     });
 
     /* Extract JSON from response */
-    const responseText = response.content[0].text;
+    const responseText = response.choices[0].message.content;
     let parsedResponse;
 
     try {
@@ -151,8 +149,9 @@ Rules:
 };
 
 /* Keyword-based fallback for common commands */
-const keywordFallback = (message) => {
+const keywordFallback = async (message) => {
   const lowerMessage = message.toLowerCase().trim();
+  const events = await llmModel.getAvailableEvents();
 
   /* Greeting patterns */
   if (/^(hi|hello|hey|greetings|good\s+(morning|afternoon|evening))/.test(lowerMessage)) {
@@ -173,6 +172,7 @@ const keywordFallback = (message) => {
       success: true,
       intent: 'show_events',
       message: 'Here are the available events:',
+      events,
       event_name: null,
       event_id: null,
       tickets: null,

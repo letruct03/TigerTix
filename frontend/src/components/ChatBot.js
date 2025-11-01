@@ -6,14 +6,39 @@ import './ChatBot.css';
  * LLM-driven interface for ticket booking
  * Implements the 5 allowed chatbot tasks
  */
+
+
 function ChatBot() {
-  const [messages, setMessages] = useState([
-    {
-      role: 'assistant',
-      content: 'Hello! Welcome to TigerTix. I can help you view available events and book tickets. Try saying "show events" or "book tickets for [event name]".',
-      timestamp: new Date()
+  const [ttsEnabled, setTtsEnabled] = useState(true);
+  const speak = (text) => {
+    if (!ttsEnabled) return;
+
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'en-US';
+      utterance.rate = 1;
+      utterance.pitch = 1;
+      window.speechSynthesis.speak(utterance);
+    } else {
+      console.warn('TTS not supported in this browser.');
     }
-  ]);
+  };
+
+  const [messages, setMessages] = useState([])  
+  const welcomeSpokenRef = useRef(false);
+      useEffect(() => {
+        if (welcomeSpokenRef.current) return;
+        const welcomeMsg = {
+          role: 'assistant',
+          content: 'Hello! Welcome to TigerTix. I can help you view available events and book tickets. Try saying "show events" or "book tickets for [event name]".',
+          timestamp: new Date()
+        };
+        setMessages([welcomeMsg]);
+        speak(welcomeMsg.content); 
+        welcomeSpokenRef.current = true;
+}, []);
+  useEffect(() => {
+  }, []);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [pendingBooking, setPendingBooking] = useState(null);
@@ -75,6 +100,7 @@ function ChatBot() {
           content: data.message,
           timestamp: new Date()
         }]);
+        speak(data.message);
       } 
       else if (data.intent === 'show_events') {
         /* Task 2: Showing events with available tickets */
@@ -101,6 +127,7 @@ function ChatBot() {
           timestamp: new Date(),
           events: data.events
         }]);
+        speak(eventsList);
       } 
       else if (data.intent === 'book_tickets') {
         if (data.event_id && data.tickets) {
@@ -123,12 +150,14 @@ function ChatBot() {
               tickets: data.tickets
             }
           }]);
+          speak(data.message);
         } else {
           setMessages(prev => [...prev, {
             role: 'assistant',
             content: data.message || 'Could not find that event. Please try again or say "show events" to see available options.',
             timestamp: new Date()
           }]);
+          speak(data.message);
         }
       }
       else {
@@ -137,6 +166,7 @@ function ChatBot() {
           content: data.message,
           timestamp: new Date()
         }]);
+        speak(data.message);
       }
 
     } catch (error) {
@@ -146,6 +176,7 @@ function ChatBot() {
         content: 'Sorry, I encountered an error. Please try again.',
         timestamp: new Date()
       }]);
+      speak('Sorry, I encountered an error. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -221,11 +252,62 @@ function ChatBot() {
     }
   };
 
+  const [isRecording, setIsRecording] = useState(false);
+  const recognitionRef = useRef(null);
+  useEffect(() => {
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) return; // Browser doesn't support
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = "en-US";
+    recognition.interimResults = true;
+    recognition.continuous = true;
+
+    recognition.onresult = (event) => {
+      let transcript = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        transcript += event.results[i][0].transcript;
+      }
+      setInputValue(transcript); // Update inputValue with live transcript
+    };
+
+    recognition.onend = () => {
+      setIsRecording(false);
+    };
+      recognitionRef.current = recognition;
+  }, []);
+
+  const toggleMic = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      alert("Speech recognition not supported in this browser 😢");
+      return;
+    }
+
+    if (!isRecording) {
+      recognitionRef.current.start();
+      setIsRecording(true);
+    } else {
+      recognitionRef.current.stop();
+      setIsRecording(false);
+    }
+  };
+
   return (
     <div className="chatbot-container">
       <div className="chatbot-header">
         <h2>🎫 TigerTix Booking Assistant</h2>
         <p className="chatbot-subtitle">Book tickets using natural language</p>
+        <button
+          onClick={() => setTtsEnabled(prev => !prev)}
+          className="tts-toggle-button"
+          aria-label="Toggle text to speech"
+        >
+          {ttsEnabled ? '🔊 TTS On' : '🔇 TTS Off'}
+        </button>
       </div>
 
       <div className="chatbot-messages" role="log" aria-live="polite" aria-label="Chat messages">
@@ -297,7 +379,7 @@ function ChatBot() {
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onKeyPress={handleKeyPress}
-          placeholder="Type your message... (e.g., 'show events' or 'book 2 tickets for Jazz Night')"
+          placeholder="Type your message or use the mic ... (e.g., 'show events' or 'book 2 tickets for Jazz Night')"
           disabled={isLoading}
           rows="2"
           aria-label="Message input"
@@ -310,8 +392,15 @@ function ChatBot() {
         >
           Send
         </button>
-      </div>
-
+        <button
+          type="button"
+          className={`mic-button ${isRecording ? "recording" : ""}`}
+          onClick={toggleMic}
+          aria-label="Voice input"
+        >
+          {isRecording ? "⏺" : "🎤"}
+        </button>
+        </div>
       <div className="chatbot-help">
         <details>
           <summary>Need help?</summary>
