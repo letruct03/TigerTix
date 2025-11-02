@@ -92,15 +92,16 @@ describe('Admin Service', () => {
     describe('GET /api/admin/events/:id', () => {
 
         it('should find an event based on an input ID', async () => {
-            const exEvent = await request(app)
+            const example = await request(app)
                 .post('api/admin/events')
                 .send({name: 'event', date: '2025-12-31', total_tickets: 300})
                 .expect(201)
 
             const response = await request(app)
-                .get(`/api/admin/events/${exEvent}`)
+                .get(`/api/admin/events/1`)
                 .expect(200)
         
+        expect(example.body.success).toBe(true);
         expect(response.body.success).toBe(true);
         });
 
@@ -125,10 +126,11 @@ describe('Admin Service', () => {
                 .expect(201)
             
             const response = await request(app)
-                .put(`/api/admin/events/${example}`)
+                .put(`/api/admin/events/1`)
                 .send({name: 'betterEvent'})
                 .expect(200)
 
+            expect(example.body.success).toBe(true);
             expect(response.body.success).toBe(true);
             expect(response.body.name).toBe('betterEvent');
             
@@ -154,9 +156,11 @@ describe('Admin Service', () => {
                 .post('api/admin/events')
                 .send({name: 'event', date: '2025-12-31', total_tickets: 300})
                 .expect(201)
+            
+            expect(example.body.success).toBe(true);
 
             const response = await request(app)
-                .delete(`/api/admin/events/${example}`)
+                .delete(`/api/admin/events/1`)
                 .expect(200)
 
             expect(response.body.success).toBe(true);
