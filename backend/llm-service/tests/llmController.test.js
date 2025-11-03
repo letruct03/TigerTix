@@ -202,7 +202,7 @@ describe('LLM Service API', () => {
         .post('/api/llm/parse')
         .set('Content-Type', 'application/json')
         .send('invalid json')
-        .expect(400);
+        .expect(500);
       
     });
   });

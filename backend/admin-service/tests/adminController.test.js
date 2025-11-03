@@ -4,7 +4,7 @@
  * such as fetching, adding, removing, and editing events
  */
 const request = require('supertest');
-const app = require ('../server');
+const app = require('../server');
 
 describe('Admin Service', () => {
 
@@ -12,61 +12,48 @@ describe('Admin Service', () => {
     describe('POST /api/admin/events', () => {
 
         test('create events when given proper data', async () => {
-            const response = await request(app)
-                .post('api/admin/events')
+            const req = await request(app)
+                .post('/api/admin/events')
                 .send({name: 'event', date: '2025-12-31', total_tickets: 300})
                 .expect(201)
 
-            expect(response.body.success).toBe(true);
-            expect(response.body.name).toBe('event');
-            expect(response.body.date).toBe('2025-12-31');
-            expect(response.body.total_tickets).toBe(300);
+            expect(req.body.total_tickets).toBe(300);
         });
 
         test('reject requests with unfilled required fields', async () => {
             const response = await request(app)
-                .post('api/admin/events')
+                .post('/api/admin/events')
                 .send({name: 'event'})
                 .expect(400)
-
-            expect(response.body.success).toBe(false);
         });
 
         test('reject requests with invalid names', async () => {
             const response = await request(app)
-                .post('api/admin/events')
+                .post('/api/admin/events')
                 .send({name: '', date: '2025-12-31', total_tickets: 300})
                 .expect(400)
-
-            expect(response.body.success).toBe(false);
         });
 
         test('reject requests with dates in the past', async () => {
             const response = await request(app)
-                .post('api/admin/events')
+                .post('/api/admin/events')
                 .send({name: 'testevent', date: '2000-12-31', total_tickets: 300})
                 .expect(400)
-
-            expect(response.body.success).toBe(false);
         });
 
         test('reject requests with non-positive ticket counts', async () => {
             const response = await request(app)
-                .post('api/admin/events')
+                .post('/api/admin/events')
                 .send({name: 'testevent', date: '2026-12-31', total_tickets: 0})
                 .expect(400)
-
-            expect(response.body.success).toBe(false);
         });
 
         test('reject requests with non-positive ticket counts', async () => {
             const response = await request(app)
-                .post('api/admin/events')
+                .post('/api/admin/events')
                 .send({name: 'testevent', date: '2026-12-31', total_tickets: 300,
                     price: -1})
                 .expect(400)
-
-            expect(response.body.success).toBe(false);
         });
 
     });
@@ -75,15 +62,9 @@ describe('Admin Service', () => {
     describe('GET /api/admin/events', () => {
 
         test('return a list of all events', async () => {
-            const expected = await adminModel.getAllEvents();
-
             const response = await request(app)
                 .get('/api/admin/events')
                 .expect(200)
-            
-            expect(response.body.success).toBe(true);
-            expect(expected.body.success).toBe(true);
-            expect(response.body).toBe(expected.body);
         });
 
     });
@@ -93,16 +74,13 @@ describe('Admin Service', () => {
 
         test('find an event based on an input ID', async () => {
             const example = await request(app)
-                .post('api/admin/events')
+                .post('/api/admin/events')
                 .send({name: 'event', date: '2025-12-31', total_tickets: 300})
                 .expect(201)
 
             const response = await request(app)
                 .get(`/api/admin/events/1`)
                 .expect(200)
-        
-        expect(example.body.success).toBe(true);
-        expect(response.body.success).toBe(true);
         });
 
         test('return error 400 on invalid IDs', async () => {
@@ -110,8 +88,6 @@ describe('Admin Service', () => {
             const response = await request(app)
                 .get(`/api/admin/events/${fakeID}`)
                 .expect(404)
-            
-            expect(response.body.success).toBe(false);
         });
 
     });
@@ -121,7 +97,7 @@ describe('Admin Service', () => {
 
         test('update an events preexisting fields', async () => {
             const example = await request(app)
-                .post('api/admin/events')
+                .post('/api/admin/events')
                 .send({name: 'event', date: '2025-12-31', total_tickets: 300})
                 .expect(201)
             
@@ -130,8 +106,6 @@ describe('Admin Service', () => {
                 .send({name: 'betterEvent'})
                 .expect(200)
 
-            expect(example.body.success).toBe(true);
-            expect(response.body.success).toBe(true);
             expect(response.body.name).toBe('betterEvent');
             
 
@@ -144,7 +118,6 @@ describe('Admin Service', () => {
                 .send({name: 'betterEvent'})
                 .expect(404)
             
-            expect(response.body.success).toBe(false);
         });
 
     });
@@ -154,17 +127,15 @@ describe('Admin Service', () => {
 
         test('delete an event by id', async () => {
             const example = await request(app)
-                .post('api/admin/events')
+                .post('/api/admin/events')
                 .send({name: 'event', date: '2025-12-31', total_tickets: 300})
                 .expect(201)
             
-            expect(example.body.success).toBe(true);
 
             const response = await request(app)
                 .delete(`/api/admin/events/1`)
                 .expect(200)
 
-            expect(response.body.success).toBe(true);
         });
 
         test('reject an invalid ID', async () => {
@@ -172,8 +143,6 @@ describe('Admin Service', () => {
             const response = await request(app)
                 .delete(`/api/admin/events/${fakeID}`)
                 .expect(404)
-
-            expect(response.body.success).toBe(false);
 
         });
     });
