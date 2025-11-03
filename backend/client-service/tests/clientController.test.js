@@ -11,10 +11,27 @@ describe('Client Service', () => {
     /** Get all events */
     describe('GET /', () => {
 
+        test('displays all events', async () => {
+            const response = await request(app)
+                .get('/')
+                .expect(200)
+
+            expect(response.body.success).toBe(true);
+        });
+
     });
 
     /** Purchase a ticket */
     describe('POST /:id/purchase', () => {
+
+        test('ticket counter deprecates', async () => {
+            const response = await request(app)
+                .post('/1/purchase')
+                .expect(200);
+
+            expect(response.body.success).toBe(true);
+            
+        });
 
     });
 

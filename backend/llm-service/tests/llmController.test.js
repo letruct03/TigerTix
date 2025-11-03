@@ -10,7 +10,7 @@ describe('LLM Service API', () => {
   
   describe('POST /api/llm/parse', () => {
     
-    it('should handle greeting intents', async () => {
+    test('handle greeting intents', async () => {
       const response = await request(app)
         .post('/api/llm/parse')
         .send({ message: 'Hello' })
@@ -21,7 +21,7 @@ describe('LLM Service API', () => {
       expect(response.body.message).toBeDefined();
     });
     
-    it('should handle show events intent', async () => {
+    test('handle show events intent', async () => {
       const response = await request(app)
         .post('/api/llm/parse')
         .send({ message: 'show me the events' })
@@ -31,7 +31,7 @@ describe('LLM Service API', () => {
       expect(response.body.intent).toBe('show_events');
     });
     
-    it('should reject empty message', async () => {
+    test('reject empty message', async () => {
       const response = await request(app)
         .post('/api/llm/parse')
         .send({ message: '' })
@@ -41,7 +41,7 @@ describe('LLM Service API', () => {
       expect(response.body.error).toBeDefined();
     });
     
-    it('should reject missing message', async () => {
+    test('reject missing message', async () => {
       const response = await request(app)
         .post('/api/llm/parse')
         .send({})
@@ -50,7 +50,7 @@ describe('LLM Service API', () => {
       expect(response.body.success).toBe(false);
     });
     
-    it('should handle booking intent with event name', async () => {
+    test('handle booking intent with event name', async () => {
       const response = await request(app)
         .post('/api/llm/parse')
         .send({ message: 'book 2 tickets for Jazz Night' });
@@ -67,7 +67,7 @@ describe('LLM Service API', () => {
   
   describe('POST /api/llm/confirm-booking', () => {
     
-    it('should reject missing event_id', async () => {
+    test('reject missing event_id', async () => {
       const response = await request(app)
         .post('/api/llm/confirm-booking')
         .send({ tickets: 2 })
@@ -77,7 +77,7 @@ describe('LLM Service API', () => {
       expect(response.body.error).toMatch(/required/i);
     });
     
-    it('should reject missing tickets', async () => {
+    test('reject missing tickets', async () => {
       const response = await request(app)
         .post('/api/llm/confirm-booking')
         .send({ event_id: 1 })
@@ -86,7 +86,7 @@ describe('LLM Service API', () => {
       expect(response.body.success).toBe(false);
     });
     
-    it('should reject invalid event_id', async () => {
+    test('reject invalid event_id', async () => {
       const response = await request(app)
         .post('/api/llm/confirm-booking')
         .send({ event_id: 'invalid', tickets: 2 })
@@ -95,7 +95,7 @@ describe('LLM Service API', () => {
       expect(response.body.success).toBe(false);
     });
     
-    it('should reject negative ticket count', async () => {
+    test('reject negative ticket count', async () => {
       const response = await request(app)
         .post('/api/llm/confirm-booking')
         .send({ event_id: 1, tickets: -1 })
@@ -104,7 +104,7 @@ describe('LLM Service API', () => {
       expect(response.body.success).toBe(false);
     });
     
-    it('should reject zero ticket count', async () => {
+    test('reject zero ticket count', async () => {
       const response = await request(app)
         .post('/api/llm/confirm-booking')
         .send({ event_id: 1, tickets: 0 })
@@ -113,7 +113,7 @@ describe('LLM Service API', () => {
       expect(response.body.success).toBe(false);
     });
     
-    it('should handle non-existent event', async () => {
+    test('handle non-existent event', async () => {
       const response = await request(app)
         .post('/api/llm/confirm-booking')
         .send({ event_id: 99999, tickets: 2 })
@@ -126,7 +126,7 @@ describe('LLM Service API', () => {
   
   describe('GET /api/llm/events', () => {
     
-    it('should return available events', async () => {
+    test('return available events', async () => {
       const response = await request(app)
         .get('/api/llm/events')
         .expect(200);
@@ -136,7 +136,7 @@ describe('LLM Service API', () => {
       expect(Array.isArray(response.body.events)).toBe(true);
     });
     
-    it('should only return events with available tickets', async () => {
+    test('only return events with available tickets', async () => {
       const response = await request(app)
         .get('/api/llm/events')
         .expect(200);
@@ -149,7 +149,7 @@ describe('LLM Service API', () => {
   
   describe('GET /health', () => {
     
-    it('should return health status', async () => {
+    test('return health status', async () => {
       const response = await request(app)
         .get('/health')
         .expect(200);
@@ -162,7 +162,7 @@ describe('LLM Service API', () => {
   
   describe('Keyword Fallback', () => {
     
-    it('should use fallback for simple greetings', async () => {
+    test('use fallback for simple greetings', async () => {
       const greetings = ['hi', 'hello', 'hey', 'good morning'];
       
       for (const greeting of greetings) {
@@ -174,7 +174,7 @@ describe('LLM Service API', () => {
       }
     });
     
-    it('should use fallback for show events commands', async () => {
+    test('use fallback for show events commands', async () => {
       const commands = ['show events', 'list events', 'view events'];
       
       for (const command of commands) {
@@ -189,7 +189,7 @@ describe('LLM Service API', () => {
   
   describe('Error Handling', () => {
     
-    it('should handle 404 for invalid routes', async () => {
+    test('handle 404 for invalid routes', async () => {
       const response = await request(app)
         .get('/api/llm/invalid-route')
         .expect(404);
@@ -197,7 +197,7 @@ describe('LLM Service API', () => {
       expect(response.body.error).toBeDefined();
     });
     
-    it('should handle invalid JSON', async () => {
+    test('handle invalid JSON', async () => {
       const response = await request(app)
         .post('/api/llm/parse')
         .set('Content-Type', 'application/json')
@@ -209,7 +209,7 @@ describe('LLM Service API', () => {
   
   describe('Transaction Safety', () => {
     
-    it('should prevent overselling (concurrent booking test)', async () => {
+    test('prevent overselling (concurrent booking test)', async () => {
       expect(true).toBe(true);
     });
   });
@@ -218,7 +218,7 @@ describe('LLM Service API', () => {
 /* Integration tests verifying the complete booking flow */
 describe('Complete Booking Flow', () => {
   
-  it('should complete full booking workflow', async () => {
+  test('complete full booking workflow', async () => {
     /* Step 1: Get available events */
     const eventsResponse = await request(app)
       .get('/api/llm/events')
@@ -253,7 +253,7 @@ describe('Complete Booking Flow', () => {
 /* Accessibility tests verifying that responses include necessary information for screen readers */
 describe('Accessibility Compliance', () => {
   
-  it('should provide clear, descriptive messages', async () => {
+  test('provide clear, descriptive messages', async () => {
     const response = await request(app)
       .post('/api/llm/parse')
       .send({ message: 'hello' })
@@ -264,7 +264,7 @@ describe('Accessibility Compliance', () => {
     expect(response.body.message.length).toBeGreaterThan(0);
   });
   
-  it('should provide structured data for assistive technology', async () => {
+  test('provide structured data for assistive technology', async () => {
     const response = await request(app)
       .get('/api/llm/events')
       .expect(200);
