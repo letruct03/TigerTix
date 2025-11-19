@@ -1,28 +1,34 @@
+/**
+ * Login.js - User login component
+ * Handles user authentication with email and password
+ */
+
 import React, { useState } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import './Auth.css';
 
-/**
- * Login Component
- * User login form with email and password
- */
-function Login({ onLoginSuccess, onSwitchToRegister }) {
+const Login = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { login, loading } = useAuth();
+
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
-
   const [errors, setErrors] = useState({});
-  const [isLoading, setIsLoading] = useState(false);
-  const [serverError, setServerError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
-  // Handle input changes
+  // Get redirect path from location state or default to home
+  const from = location.state?.from?.pathname || '/';
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
-    
     // Clear error for this field when user starts typing
     if (errors[name]) {
       setErrors(prev => ({
@@ -30,24 +36,17 @@ function Login({ onLoginSuccess, onSwitchToRegister }) {
         [name]: ''
       }));
     }
-    setServerError('');
   };
 
-  // Validate form inputs
   const validateForm = () => {
     const newErrors = {};
 
-    // Email validation
     if (!formData.email) {
       newErrors.email = 'Email is required';
-    } else {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(formData.email)) {
-        newErrors.email = 'Invalid email format';
-      }
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = 'Invalid email format';
     }
 
-    // Password validation
     if (!formData.password) {
       newErrors.password = 'Password is required';
     }
@@ -56,71 +55,43 @@ function Login({ onLoginSuccess, onSwitchToRegister }) {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setServerError('');
 
-    // Validate form
     if (!validateForm()) {
       return;
     }
 
-    setIsLoading(true);
+    const result = await login(formData.email, formData.password);
 
-    try {
-      const response = await fetch('http://localhost:4001/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password
-        })
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        // Store tokens in localStorage
-        localStorage.setItem('accessToken', data.tokens.accessToken);
-        localStorage.setItem('refreshToken', data.tokens.refreshToken);
-        localStorage.setItem('user', JSON.stringify(data.user));
-
-        // Call success callback
-        if (onLoginSuccess) {
-          onLoginSuccess(data.user, data.tokens);
-        }
-      } else {
-        setServerError(data.message || 'Login failed. Please try again.');
-      }
-    } catch (error) {
-      console.error('Login error:', error);
-      setServerError('Unable to connect to server. Please try again later.');
-    } finally {
-      setIsLoading(false);
+    if (result.success) {
+      // Redirect to previous page or home
+      navigate(from, { replace: true });
+    } else {
+      setErrors({ submit: result.error || 'Login failed. Please check your credentials.' });
     }
   };
 
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <h2>Welcome Back</h2>
-        <p className="auth-subtitle">Login to your TigerTix account</p>
+        <div className="auth-header">
+          <h1>🎫 TigerTix</h1>
+          <h2>Welcome Back</h2>
+          <p>Sign in to your account</p>
+        </div>
 
-        <form onSubmit={handleSubmit} className="auth-form">
-          {/* Server Error Message */}
-          {serverError && (
-            <div className="error-message" role="alert" aria-live="assertive">
-              {serverError}
+        <form onSubmit={handleSubmit} className="auth-form" noValidate>
+          {errors.submit && (
+            <div className="error-banner" role="alert">
+              {errors.submit}
             </div>
           )}
 
-          {/* Email Field */}
           <div className="form-group">
             <label htmlFor="email">
-              Email Address <span className="required">*</span>
+              Email Address
+              <span className="required" aria-label="required">*</span>
             </label>
             <input
               type="email"
@@ -130,84 +101,76 @@ function Login({ onLoginSuccess, onSwitchToRegister }) {
               onChange={handleChange}
               className={errors.email ? 'error' : ''}
               placeholder="you@clemson.edu"
+              autoComplete="email"
+              required
               aria-required="true"
               aria-invalid={errors.email ? 'true' : 'false'}
               aria-describedby={errors.email ? 'email-error' : undefined}
-              disabled={isLoading}
-              autoComplete="email"
             />
             {errors.email && (
-              <span id="email-error" className="field-error" role="alert">
+              <span id="email-error" className="error-message" role="alert">
                 {errors.email}
               </span>
             )}
           </div>
 
-          {/* Password Field */}
           <div className="form-group">
             <label htmlFor="password">
-              Password <span className="required">*</span>
+              Password
+              <span className="required" aria-label="required">*</span>
             </label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              className={errors.password ? 'error' : ''}
-              placeholder="Enter your password"
-              aria-required="true"
-              aria-invalid={errors.password ? 'true' : 'false'}
-              aria-describedby={errors.password ? 'password-error' : undefined}
-              disabled={isLoading}
-              autoComplete="current-password"
-            />
+            <div className="password-input-wrapper">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                className={errors.password ? 'error' : ''}
+                placeholder="Enter your password"
+                autoComplete="current-password"
+                required
+                aria-required="true"
+                aria-invalid={errors.password ? 'true' : 'false'}
+                aria-describedby={errors.password ? 'password-error' : undefined}
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? '👁️' : '👁️‍🗨️'}
+              </button>
+            </div>
             {errors.password && (
-              <span id="password-error" className="field-error" role="alert">
+              <span id="password-error" className="error-message" role="alert">
                 {errors.password}
               </span>
             )}
           </div>
 
-          {/* Remember Me & Forgot Password */}
-          <div className="form-options">
-            <label className="checkbox-label">
-              <input type="checkbox" name="rememberMe" />
-              <span>Remember me</span>
-            </label>
-            <button type="button" className="forgot-password-link">
-              Forgot password?
-            </button>
-          </div>
-
-          {/* Submit Button */}
           <button
             type="submit"
-            className="auth-submit-btn"
-            disabled={isLoading}
-            aria-label="Login to account"
+            className="btn-primary"
+            disabled={loading}
+            aria-busy={loading}
           >
-            {isLoading ? 'Logging in...' : 'Login'}
+            {loading ? 'Signing In...' : 'Sign In'}
           </button>
-        </form>
 
-        {/* Switch to Register */}
-        <div className="auth-switch">
-          <p>
-            Don't have an account?{' '}
-            <button
-              type="button"
-              onClick={onSwitchToRegister}
-              className="auth-link"
-              disabled={isLoading}
-            >
-              Sign up here
-            </button>
-          </p>
-        </div>
+          <div className="auth-footer">
+            <p>
+              Don't have an account?{' '}
+              <Link to="/register" className="auth-link">
+                Create Account
+              </Link>
+            </p>
+          </div>
+        </form>
       </div>
     </div>
   );
-}
+};
 
 export default Login;

@@ -1,0 +1,406 @@
+/**
+ * EventsPage.css - Events page styles
+ */
+
+.events-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.page-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.page-header h1 {
+  color: #522d80;
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+}
+
+.page-header p {
+  color: #666;
+  font-size: 1.1rem;
+}
+
+.view-toggle {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 30px;
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.view-toggle button {
+  padding: 12px 30px;
+  font-size: 16px;
+  font-weight: 600;
+  border: 2px solid #522d80;
+  background: white;
+  color: #522d80;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.view-toggle button:hover {
+  background: #f5f5f5;
+  transform: translateY(-2px);
+}
+
+.view-toggle button.active {
+  background: #522d80;
+  color: white;
+}
+
+.view-toggle button:focus {
+  outline: 3px solid #f66d0c;
+  outline-offset: 2px;
+}
+
+.events-content {
+  min-height: 500px;
+}
+
+.events-list {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.events-list h2 {
+  color: #522d80;
+  margin-bottom: 25px;
+  font-size: 2rem;
+}
+
+.error-message {
+  background: #ffebee;
+  border: 2px solid #dc3545;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.error-message p {
+  color: #dc3545;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.retry-button {
+  padding: 10px 20px;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.retry-button:hover {
+  background: #c82333;
+  transform: translateY(-2px);
+}
+
+.retry-button:focus {
+  outline: 2px solid #522d80;
+  outline-offset: 2px;
+}
+
+.no-events {
+  text-align: center;
+  color: #666;
+  font-size: 1.2rem;
+  padding: 60px 20px;
+}
+
+.events-grid {
+  list-style: none;
+  display: grid;
+  gap: 25px;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  padding: 0;
+  margin: 0;
+}
+
+.event-card {
+  background: #f9f9f9;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 24px;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 300px;
+}
+
+.event-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  border-color: #f66d0c;
+}
+
+.event-card:focus-within {
+  outline: 3px solid #f66d0c;
+  outline-offset: 2px;
+}
+
+.event-info h3 {
+  color: #522d80;
+  margin-bottom: 16px;
+  font-size: 1.4rem;
+  line-height: 1.3;
+}
+
+.event-meta {
+  margin-bottom: 16px;
+}
+
+.event-date {
+  color: #666;
+  font-size: 0.95rem;
+  margin: 8px 0;
+  font-weight: 500;
+}
+
+.event-location {
+  color: #666;
+  font-size: 0.95rem;
+  margin: 8px 0;
+}
+
+.event-category {
+  display: inline-block;
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+.event-description {
+  color: #555;
+  line-height: 1.6;
+  margin: 16px 0;
+  padding-top: 16px;
+  border-top: 1px solid #e0e0e0;
+  flex-grow: 1;
+}
+
+.event-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 16px 0;
+  padding-top: 16px;
+  border-top: 1px solid #e0e0e0;
+  font-weight: 600;
+}
+
+.event-price {
+  color: #28a745;
+  font-size: 1.2rem;
+}
+
+.event-tickets {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.event-card button {
+  margin-top: 16px;
+  padding: 14px 24px;
+  background: #f66d0c;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.event-card button:hover:not(:disabled) {
+  background: #e55a00;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(246, 109, 12, 0.3);
+}
+
+.event-card button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.event-card button.sold-out {
+  background: #dc3545;
+}
+
+.event-card button:focus {
+  outline: 3px solid #522d80;
+  outline-offset: 2px;
+}
+
+/* Loading State */
+.loading-container {
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #522d80;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .event-card:hover,
+  .view-toggle button:hover,
+  .event-card button:hover,
+  .retry-button:hover {
+    transform: none;
+  }
+
+  .spinner {
+    animation: none;
+    border-top-color: #522d80;
+  }
+}
+
+@media (prefers-contrast: high) {
+  .event-card {
+    border-width: 3px;
+  }
+  
+  .view-toggle button {
+    border-width: 3px;
+  }
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .events-page {
+    padding: 15px;
+  }
+
+  .page-header h1 {
+    font-size: 2rem;
+  }
+
+  .page-header p {
+    font-size: 1rem;
+  }
+
+  .view-toggle {
+    flex-direction: column;
+    gap: 10px;
+    padding: 15px;
+  }
+
+  .view-toggle button {
+    width: 100%;
+  }
+
+  .events-list {
+    padding: 20px;
+  }
+
+  .events-list h2 {
+    font-size: 1.6rem;
+  }
+
+  .events-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-header h1 {
+    font-size: 1.6rem;
+  }
+
+  .events-list {
+    padding: 15px;
+  }
+
+  .event-card {
+    padding: 20px;
+  }
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+  .page-header h1 {
+    color: #f66d0c;
+  }
+
+  .page-header p {
+    color: #b0b0b0;
+  }
+
+  .view-toggle,
+  .events-list {
+    background: #2c2c2c;
+  }
+
+  .events-list h2 {
+    color: #f66d0c;
+  }
+
+  .event-card {
+    background: #3a3a3a;
+    border-color: #555;
+  }
+
+  .event-info h3 {
+    color: #f66d0c;
+  }
+
+  .event-date,
+  .event-location,
+  .event-description,
+  .event-tickets {
+    color: #b0b0b0;
+  }
+
+  .no-events {
+    color: #b0b0b0;
+  }
+
+  .error-message {
+    background: #4a2a2a;
+    border-color: #dc3545;
+  }
+}
