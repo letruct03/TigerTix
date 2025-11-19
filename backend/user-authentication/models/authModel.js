@@ -1,63 +1,314 @@
 /**
- * authRoutes.js - Authentication service route definitions
- * Maps HTTP endpoints to authentication controller functions
+ * authModel.js - Authentication service data layer
+ * Handles all database operations for user authentication and token management
  */
 
-const express = require('express');
-const router = express.Router();
-const authController = require('../controllers/authController');
-const { authenticate } = require('../middleware/authMiddleware');
+const sqlite3 = require('sqlite3').verbose();
+const path = require('path');
+
+const DB_PATH = process.env.DB_PATH || path.join(__dirname, '../../shared-db/database.sqlite');
 
 /**
- * POST /api/auth/register
- * Register a new user account
- * Public route
- * Request body: { email, password, first_name, last_name, role? }
- * Response: 201 with user data and JWT tokens, or 400/409/500 with error
+ * Get database connection
+ * @returns {Object} SQLite database connection
  */
-router.post('/register', authController.register);
+const getDbConnection = () => {
+  return new sqlite3.Database(DB_PATH, (err) => {
+    if (err) {
+      console.error('Database connection error:', err.message);
+    }
+  });
+};
 
 /**
- * POST /api/auth/login
- * Login with email and password
- * Public route
- * Request body: { email, password }
- * Response: 200 with user data and JWT tokens, or 401/500 with error
+ * Create a new user account
+ * @param {Object} userData - User registration data
+ * @returns {Promise<Object>} Newly created user
  */
-router.post('/login', authController.login);
+const createUser = (userData) => {
+  return new Promise((resolve, reject) => {
+    const db = getDbConnection();
+    
+    const { email, password_hash, first_name, last_name, role } = userData;
+
+    // Check if email already exists
+    db.get(
+      'SELECT id FROM users WHERE email = ?',
+      [email],
+      (err, existingUser) => {
+        if (err) {
+          db.close();
+          return reject(err);
+        }
+
+        if (existingUser) {
+          db.close();
+          return reject(new Error('Email already registered'));
+        }
+
+        // Insert new user
+        const sql = `
+          INSERT INTO users (email, password_hash, first_name, last_name, role)
+          VALUES (?, ?, ?, ?, ?)
+        `;
+
+        db.run(sql, [email, password_hash, first_name, last_name, role || 'user'], function(err) {
+          if (err) {
+            db.close();
+            return reject(err);
+          }
+
+          const userId = this.lastID;
+
+          // Retrieve the newly created user
+          db.get(
+            'SELECT id, email, first_name, last_name, role, is_verified, created_at FROM users WHERE id = ?',
+            [userId],
+            (selectErr, user) => {
+              db.close();
+              
+              if (selectErr) {
+                return reject(selectErr);
+              }
+              
+              console.log(`✓ User created with ID: ${userId}`);
+              resolve(user);
+            }
+          );
+        });
+      }
+    );
+  });
+};
 
 /**
- * POST /api/auth/refresh
- * Refresh access token using refresh token
- * Public route
- * Request body: { refreshToken }
- * Response: 200 with new token pair, or 401/500 with error
+ * Find user by email
+ * @param {string} email - User email
+ * @param {boolean} includePassword - Whether to include password hash
+ * @returns {Promise<Object|null>} User object or null
  */
-router.post('/refresh', authController.refresh);
+const findUserByEmail = (email, includePassword = false) => {
+  return new Promise((resolve, reject) => {
+    const db = getDbConnection();
+    
+    const fields = includePassword 
+      ? 'id, email, password_hash, first_name, last_name, role, is_verified, is_active, last_login'
+      : 'id, email, first_name, last_name, role, is_verified, is_active, last_login';
+    
+    const sql = `SELECT ${fields} FROM users WHERE email = ? AND is_active = 1`;
+    
+    db.get(sql, [email], (err, user) => {
+      db.close();
+      
+      if (err) {
+        return reject(err);
+      }
+      
+      resolve(user || null);
+    });
+  });
+};
 
 /**
- * POST /api/auth/logout
- * Logout by revoking refresh token
- * Public route (but requires refresh token)
- * Request body: { refreshToken }
- * Response: 200 with confirmation, or 400/500 with error
+ * Find user by ID
+ * @param {number} userId - User ID
+ * @returns {Promise<Object|null>} User object or null
  */
-router.post('/logout', authController.logout);
+const findUserById = (userId) => {
+  return new Promise((resolve, reject) => {
+    const db = getDbConnection();
+    
+    const sql = `
+      SELECT id, email, first_name, last_name, role, is_verified, is_active, created_at, last_login
+      FROM users 
+      WHERE id = ? AND is_active = 1
+    `;
+    
+    db.get(sql, [userId], (err, user) => {
+      db.close();
+      
+      if (err) {
+        return reject(err);
+      }
+      
+      resolve(user || null);
+    });
+  });
+};
 
 /**
- * GET /api/auth/me
- * Get current authenticated user's profile
- * Protected route - requires valid access token
- * Response: 200 with user profile, or 401/404/500 with error
+ * Update user's last login timestamp
+ * @param {number} userId - User ID
+ * @returns {Promise<boolean>} Success status
  */
-router.get('/me', authenticate, authController.getCurrentUser);
+const updateLastLogin = (userId) => {
+  return new Promise((resolve, reject) => {
+    const db = getDbConnection();
+    
+    const sql = 'UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?';
+    
+    db.run(sql, [userId], function(err) {
+      db.close();
+      
+      if (err) {
+        return reject(err);
+      }
+      
+      resolve(true);
+    });
+  });
+};
 
 /**
- * POST /api/auth/logout-all
- * Logout from all devices by revoking all refresh tokens
- * Protected route - requires valid access token
- * Response: 200 with confirmation, or 401/500 with error
+ * Store refresh token in database
+ * @param {number} userId - User ID
+ * @param {string} token - Refresh token
+ * @param {Date} expiresAt - Expiration date
+ * @returns {Promise<Object>} Token record
  */
-router.post('/logout-all', authenticate, authController.logoutAll);
+const storeRefreshToken = (userId, token, expiresAt) => {
+  return new Promise((resolve, reject) => {
+    const db = getDbConnection();
+    
+    const sql = `
+      INSERT INTO refresh_tokens (user_id, token, expires_at)
+      VALUES (?, ?, ?)
+    `;
+    
+    db.run(sql, [userId, token, expiresAt.toISOString()], function(err) {
+      if (err) {
+        db.close();
+        return reject(err);
+      }
 
-module.exports = router;
+      const tokenId = this.lastID;
+
+      db.get(
+        'SELECT * FROM refresh_tokens WHERE id = ?',
+        [tokenId],
+        (selectErr, tokenRecord) => {
+          db.close();
+          
+          if (selectErr) {
+            return reject(selectErr);
+          }
+          
+          resolve(tokenRecord);
+        }
+      );
+    });
+  });
+};
+
+/**
+ * Find refresh token
+ * @param {string} token - Refresh token
+ * @returns {Promise<Object|null>} Token record or null
+ */
+const findRefreshToken = (token) => {
+  return new Promise((resolve, reject) => {
+    const db = getDbConnection();
+    
+    const sql = `
+      SELECT * FROM refresh_tokens 
+      WHERE token = ? 
+      AND revoked = 0 
+      AND datetime(expires_at) > datetime('now')
+    `;
+    
+    db.get(sql, [token], (err, tokenRecord) => {
+      db.close();
+      
+      if (err) {
+        return reject(err);
+      }
+      
+      resolve(tokenRecord || null);
+    });
+  });
+};
+
+/**
+ * Revoke a refresh token
+ * @param {string} token - Refresh token to revoke
+ * @returns {Promise<boolean>} Success status
+ */
+const revokeRefreshToken = (token) => {
+  return new Promise((resolve, reject) => {
+    const db = getDbConnection();
+    
+    const sql = 'UPDATE refresh_tokens SET revoked = 1 WHERE token = ?';
+    
+    db.run(sql, [token], function(err) {
+      db.close();
+      
+      if (err) {
+        return reject(err);
+      }
+      
+      resolve(true);
+    });
+  });
+};
+
+/**
+ * Revoke all refresh tokens for a user
+ * @param {number} userId - User ID
+ * @returns {Promise<number>} Number of tokens revoked
+ */
+const revokeAllUserTokens = (userId) => {
+  return new Promise((resolve, reject) => {
+    const db = getDbConnection();
+    
+    const sql = 'UPDATE refresh_tokens SET revoked = 1 WHERE user_id = ? AND revoked = 0';
+    
+    db.run(sql, [userId], function(err) {
+      db.close();
+      
+      if (err) {
+        return reject(err);
+      }
+      
+      resolve(this.changes);
+    });
+  });
+};
+
+/**
+ * Clean up expired tokens (maintenance function)
+ * @returns {Promise<number>} Number of tokens deleted
+ */
+const cleanupExpiredTokens = () => {
+  return new Promise((resolve, reject) => {
+    const db = getDbConnection();
+    
+    const sql = `
+      DELETE FROM refresh_tokens 
+      WHERE datetime(expires_at) < datetime('now')
+      OR revoked = 1
+    `;
+    
+    db.run(sql, [], function(err) {
+      db.close();
+      
+      if (err) {
+        return reject(err);
+      }
+      
+      console.log(`✓ Cleaned up ${this.changes} expired/revoked tokens`);
+      resolve(this.changes);
+    });
+  });
+};
+
+module.exports = {
+  createUser,
+  findUserByEmail,
+  findUserById,
+  updateLastLogin,
+  storeRefreshToken,
+  findRefreshToken,
+  revokeRefreshToken,
+  revokeAllUserTokens,
+  cleanupExpiredTokens
+};
