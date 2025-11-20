@@ -3,12 +3,13 @@
  * Placeholder component - integrate with your LLM service
  */
 
-import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/authContext';
 import { API_ENDPOINTS } from '../config/api';
+import React, { useState, useRef, useEffect } from 'react';
 import './ChatBot.css';
 
 const ChatBot = ({ onEventsFetch }) => {
+  const [isTTSActive, setIsTTSActive] = useState(true); 
   const { user } = useAuth();
   const [messages, setMessages] = useState([
     {
@@ -19,7 +20,47 @@ const ChatBot = ({ onEventsFetch }) => {
   ]);
   const [inputMessage, setInputMessage] = useState('');
   const [loading, setLoading] = useState(false);
-
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      console.warn("Browser does not support SpeechRecognition");
+      return;
+    }
+    const recognition = new SpeechRecognition();
+    recognition.lang = "en-US";
+    recognition.interimResults = true;
+    recognition.continuous = true;
+    recognition.onresult = (event) => {
+      let transcript = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        transcript += event.results[i][0].transcript;
+      }
+      setInputMessage(transcript);
+    };
+    recognition.onend = () => {
+      setIsRecording(false);
+    };
+    recognitionRef.current = recognition;
+  }, []);
+  useEffect(() => {
+    if (!messages.length) return;
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage.type === "bot" && typeof lastMessage.text === "string") {
+      const utterance = new SpeechSynthesisUtterance(lastMessage.text);
+      utterance.lang = "en-US";
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utterance);
+    }
+  }, [messages]);
+  useEffect(() => {
+  if (!isTTSActive || !messages.length) return;
+  const lastBotMessage = [...messages].reverse().find(msg => msg.type === 'bot');
+  if (!lastBotMessage) return;
+  const utterance = new SpeechSynthesisUtterance(lastBotMessage.text);
+  utterance.lang = "en-US";
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(utterance);
+  }, [messages, isTTSActive]);
   const sendMessage = async () => {
     if (!inputMessage.trim()) return;
 
@@ -57,9 +98,6 @@ const ChatBot = ({ onEventsFetch }) => {
         timestamp: new Date(),
         data: data
       };
-
-      setMessages(prev => [...prev, botMessage]);
-
       // If intent is show_events, display events
       if (data.intent === 'show_events' && data.events) {
         const eventsMessage = {
@@ -149,6 +187,68 @@ const ChatBot = ({ onEventsFetch }) => {
     }
   };
 
+const [isRecording, setIsRecording] = useState(false);
+const recognitionRef = useRef(null);
+
+  useEffect(() => {
+  const SpeechRecognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+    console.warn("Browser does not support SpeechRecognition");
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
+  recognition.lang = "en-US";
+  recognition.interimResults = true;
+  recognition.continuous = true;
+
+  recognition.onresult = (event) => {
+    let transcript = "";
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      transcript += event.results[i][0].transcript;
+    }
+    setInputMessage(transcript);
+  };
+
+  recognition.onend = () => {
+    setIsRecording(false);
+  };
+
+  recognitionRef.current = recognition;
+}, []);
+
+const toggleMic = () => {
+  const recognition = recognitionRef.current;
+
+  if (!recognition) {
+    alert("Speech recognition not supported in this browser");
+    return;
+  }
+
+  if (!isRecording) {
+    recognition.start();
+    setIsRecording(true);
+  } else {
+    recognition.stop();
+    setIsRecording(false);
+  }
+};
+const [ttsEnabled, setTtsEnabled] = useState(true);
+
+const speakText = (text) => {
+  if (!ttsEnabled) return;
+
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = "en-US";
+  utterance.rate = 1;
+  utterance.pitch = 1;
+
+  window.speechSynthesis.cancel(); // stop previous speech
+  window.speechSynthesis.speak(utterance);
+};
+
   return (
     <div className="chatbot-container">
       <div className="chatbot-header">
@@ -232,6 +332,25 @@ const ChatBot = ({ onEventsFetch }) => {
           aria-label="Send message"
         >
           {loading ? '⏳' : '📤'}
+        </button>
+        <button
+          onClick={toggleMic}
+          className={isRecording ? "mic-button recording" : "mic-button"}
+          aria-label="Voice input"
+        >
+        🎤
+        </button>
+        <button
+          onClick={() => {
+            if (window.speechSynthesis.speaking) {
+                window.speechSynthesis.cancel();
+            }
+            setIsTTSActive(prev => !prev)}
+          }
+          className={isTTSActive ? "tts-button active" : "tts-button"}
+          aria-label={isTTSActive ? "Disable TTS" : "Enable TTS"}
+        >
+          🔊
         </button>
       </div>
 

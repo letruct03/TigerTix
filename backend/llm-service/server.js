@@ -28,7 +28,7 @@ app.get('/health', (req, res) => {
     service: 'llm-service',
     status: 'healthy',
     timestamp: new Date().toISOString(),
-    api_key_configured: !!process.env.ANTHROPIC_API_KEY
+    api_key_configured: !!process.env.OPENAI_API_KEY
   });
 });
 
@@ -65,12 +65,12 @@ const startServer = () => {
   console.log('=================================');
   
   /* Check for API key */
-  if (!process.env.ANTHROPIC_API_KEY) {
-    console.warn('⚠️  WARNING: ANTHROPIC_API_KEY not set!');
+  if (!process.env.OPENAI_API_KEY) {
+    console.warn('⚠️  WARNING: OPEN AI KEY NOT SET');
     console.warn('   The service will use keyword fallback only.');
-    console.warn('   Set ANTHROPIC_API_KEY environment variable to enable LLM features.\n');
+    console.warn('   Set OPENAI_API_KEY environment variable to enable LLM features.\n');
   } else {
-    console.log('✓ Anthropic API key configured\n');
+    console.log('✓ OPENAI_API_KEY configured\n');
   }
   
   app.listen(PORT, () => {

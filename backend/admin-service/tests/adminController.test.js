@@ -77,9 +77,9 @@ describe('Admin Service', () => {
                 .post('/api/admin/events')
                 .send({name: 'event', date: '2025-12-31', total_tickets: 300})
                 .expect(201)
-
+            const eventId = example.body.id;
             const response = await request(app)
-                .get(`/api/admin/events/1`)
+                .get(`/api/admin/events/${eventID}`)
                 .expect(200)
         });
 
@@ -100,9 +100,9 @@ describe('Admin Service', () => {
                 .post('/api/admin/events')
                 .send({name: 'event', date: '2025-12-31', total_tickets: 300})
                 .expect(201)
-            
+            const eventId = example.body.id;
             const response = await request(app)
-                .put(`/api/admin/events/1`)
+                .put(`/api/admin/events/${eventID}`)
                 .send({name: 'betterEvent'})
                 .expect(200)
 

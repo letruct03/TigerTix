@@ -12,7 +12,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use('/api/events', clientRoutes);
 
-app.get('health',(req, res) => {
+app.get('/health', (req, res) => {
     res.json({
         status: 'OK',
         service: 'client-service',
@@ -20,12 +20,12 @@ app.get('health',(req, res) => {
     });
 });
 
-app.get('/',(req, res) =>{
+app.get('/', (req, res) => {
     res.json({
         message: 'Client Service is running',
-        endpoints:{
+        endpoints: {
             getEvents: 'GET /api/events',
-            purchaseTiceket: 'POST api/events/:id/purchase',
+            purchaseTicket: 'POST /api/events/:id/purchase',
             health: 'GET /health'
         }
     });
@@ -33,14 +33,18 @@ app.get('/',(req, res) =>{
 
 app.use((err, req, res, next) => {
     console.error('Error:', err.stack);
-    res.status(500).json({error: 'Something went wrong!'});
+    res.status(500).json({ error: 'Something went wrong!' });
 });
 
 app.use((req, res) => {
-    res.status(404).json({error: 'Endpoint not found'});
+    res.status(404).json({ error: 'Endpoint not found' });
 });
 
-app.listen(PORT, () => {
-    console.log('Client service running on port ${PORT}');
-    console.log('Visit http://localhost:${PORT}/api/events to see all events');
-});
+if (require.main === module) {
+    app.listen(PORT, () => {
+        console.log(`Client service running on port ${PORT}`);
+        console.log(`Visit http://localhost:${PORT}/api/events to see all events`);
+    });
+}
+
+module.exports = app;

@@ -4,9 +4,9 @@
  */
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6001';
-const AUTH_BASE_URL = process.env.REACT_APP_AUTH_URL || 'http://localhost:6003';
-const ADMIN_BASE_URL = process.env.REACT_APP_ADMIN_URL || 'http://localhost:6000';
-const LLM_BASE_URL = process.env.REACT_APP_LLM_URL || 'http://localhost:6002';
+const AUTH_BASE_URL = process.env.REACT_APP_AUTH_URL || 'http://localhost:4001';
+const ADMIN_BASE_URL = process.env.REACT_APP_ADMIN_URL || 'http://localhost:5001';
+const LLM_BASE_URL = process.env.REACT_APP_LLM_URL || 'http://localhost:7001';
 
 export const API_ENDPOINTS = {
   // Client Service - Event Browsing

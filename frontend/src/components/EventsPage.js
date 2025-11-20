@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/authContext';
 import { API_ENDPOINTS, authenticatedFetch } from '../config/api';
 import ChatBot from './ChatBot';
 import './EventsPage.css';

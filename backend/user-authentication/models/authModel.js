@@ -6,7 +6,7 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 
-const DB_PATH = process.env.DB_PATH || path.join(__dirname, '../../shared-db/database.sqlite');
+const DB_PATH = process.env.DB_PATH || path.join(__dirname, '../database/auth.sqlite');
 
 /**
  * Get database connection
@@ -175,7 +175,7 @@ const storeRefreshToken = (userId, token, expiresAt) => {
       VALUES (?, ?, ?)
     `;
     
-    db.run(sql, [userId, token, expiresAt.toISOString()], function(err) {
+    db.run(sql, [userId, token, expiresAt.toISOString().slice(0,19).replace('T',' ')], function(err) {
       if (err) {
         db.close();
         return reject(err);
@@ -300,6 +300,16 @@ const cleanupExpiredTokens = () => {
     });
   });
 };
+async function clearRefreshTokens() {
+  const db = getDbConnection();
+  return new Promise((resolve, reject) => {
+    db.run('DELETE FROM refresh_tokens', function(err) {
+      db.close();
+      if (err) return reject(err);
+      resolve(this.changes);
+    });
+  });
+}
 
 module.exports = {
   createUser,
@@ -310,5 +320,6 @@ module.exports = {
   findRefreshToken,
   revokeRefreshToken,
   revokeAllUserTokens,
-  cleanupExpiredTokens
+  cleanupExpiredTokens,
+  clearRefreshTokens
 };

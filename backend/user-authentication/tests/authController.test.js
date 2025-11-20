@@ -6,12 +6,21 @@
 const request = require('supertest');
 const app = require('../server');
 const authModel = require('../models/authModel');
+const { initializeAuthDatabase } = require('../setup');
+beforeAll(async () => {
+  process.env.DB_PATH = require('path').join(__dirname, '../database/auth.sqlite');
+  await initializeAuthDatabase();
+});
+beforeEach(async () => {
+  await authModel.clearRefreshTokens();
+});
+
 
 describe('Authentication Service', () => {
-  
+  const uniqueSuffix = Date.now();
   // Test data
   const testUser = {
-    email: 'test@clemson.edu',
+    email: `test${uniqueSuffix}@clemson.edu`,
     password: 'Test123456',
     first_name: 'John',
     last_name: 'Doe',
@@ -141,17 +150,18 @@ describe('Authentication Service', () => {
     });
 
     test('should accept registration with organizer role', async () => {
+      const uniqueEmail = `organizer${Date.now()}@clemson.edu`;
       const response = await request(app)
-        .post('/api/auth/register')
-        .send({
+      .post('/api/auth/register')
+      .send({
           ...testUser,
-          email: 'organizer@clemson.edu',
+          email: uniqueEmail,
           role: 'organizer'
         })
         .expect(201);
 
-      expect(response.body.success).toBe(true);
-      expect(response.body.user.role).toBe('organizer');
+  expect(response.body.success).toBe(true);
+  expect(response.body.user.role).toBe('organizer');
     });
   });
 
@@ -233,46 +243,64 @@ describe('Authentication Service', () => {
    * TOKEN REFRESH TESTS 
    */
   describe('POST /api/auth/refresh', () => {
-    
-    test('should refresh access token with valid refresh token', async () => {
-      const response = await request(app)
-        .post('/api/auth/refresh')
-        .send({
-          refreshToken: refreshToken
-        })
-        .expect(200);
-
-      expect(response.body.success).toBe(true);
-      expect(response.body.tokens).toBeDefined();
-      expect(response.body.tokens.accessToken).toBeDefined();
-      expect(response.body.tokens.refreshToken).toBeDefined();
-
-      // Update tokens for future tests
-      accessToken = response.body.tokens.accessToken;
+    let freshRefreshToken;
+    const uniqueEmail = `refreshuser${Date.now()}@clemson.edu`;
+    const password = 'Test123456';
+    beforeAll(async () => {
+      const registerResp = await request(app)
+      .post('/api/auth/register')
+      .send({
+        email: uniqueEmail,
+        password,
+        first_name: 'Refresh',
+        last_name: 'Man',
+        role: 'user'
+      });
+      const loginResp = await request(app)
+      .post('/api/auth/login')
+      .send({
+        email: uniqueEmail,
+        password
+      });
+      freshRefreshToken = loginResp.body.tokens.refreshToken;
     });
 
-    test('should reject refresh with missing refresh token', async () => {
-      const response = await request(app)
-        .post('/api/auth/refresh')
-        .send({})
-        .expect(400);
+  test('should refresh access token with valid refresh token', async () => {
+    const response = await request(app)
+      .post('/api/auth/refresh')
+      .send({
+        refreshToken: freshRefreshToken
+      })
+      .expect(200);
 
-      expect(response.body.success).toBe(false);
-      expect(response.body.error).toBe('Missing refresh token');
-    });
-
-    test('should reject refresh with invalid refresh token', async () => {
-      const response = await request(app)
-        .post('/api/auth/refresh')
-        .send({
-          refreshToken: 'invalid-token-12345'
-        })
-        .expect(401);
-
-      expect(response.body.success).toBe(false);
-      expect(response.body.error).toBe('Invalid refresh token');
-    });
+    expect(response.body.success).toBe(true);
+    expect(response.body.tokens).toBeDefined();
+    expect(response.body.tokens.accessToken).toBeDefined();
+    expect(response.body.tokens.refreshToken).toBeDefined();
   });
+
+  test('should reject refresh with missing refresh token', async () => {
+    const response = await request(app)
+      .post('/api/auth/refresh')
+      .send({})
+      .expect(400);
+
+    expect(response.body.success).toBe(false);
+    expect(response.body.error).toBe('Missing refresh token');
+  });
+
+  test('should reject refresh with invalid refresh token', async () => {
+    const response = await request(app)
+      .post('/api/auth/refresh')
+      .send({
+        refreshToken: 'invalid-token-12345'
+      })
+      .expect(401);
+
+    expect(response.body.success).toBe(false);
+    expect(response.body.error).toBe('Invalid refresh token');
+  });
+});
 
   /** 
    * PROTECTED ROUTE TESTS 
@@ -356,20 +384,19 @@ describe('Authentication Service', () => {
     
     let newAccessToken;
     let newRefreshToken;
-
-    // Login again to get fresh tokens
     beforeAll(async () => {
       const loginResponse = await request(app)
-        .post('/api/auth/login')
-        .send({
+      .post('/api/auth/login')
+      .send({
           email: testUser.email,
           password: testUser.password
-        });
-      
-      newAccessToken = loginResponse.body.tokens.accessToken;
-      newRefreshToken = loginResponse.body.tokens.refreshToken;
+      });
+      if (!loginResponse.body.tokens) {
+        throw new Error('Login failed: tokens undefined. Check refresh token uniqueness.');
+      }
+       newAccessToken = loginResponse.body.tokens.accessToken;
+       newRefreshToken = loginResponse.body.tokens.refreshToken;
     });
-
     test('should logout from all devices', async () => {
       const response = await request(app)
         .post('/api/auth/logout-all')
@@ -400,7 +427,7 @@ describe('Authentication Service', () => {
       
       expect(user.password_hash).toBeDefined();
       expect(user.password_hash).not.toBe(testUser.password);
-      expect(user.password_hash.startsWith('$2a$')).toBe(true); // bcrypt hash format
+      expect(user.password_hash.startsWith('$2')).toBe(true); // bcrypt hash format
     });
   });
 

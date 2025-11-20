@@ -8,8 +8,8 @@ const fs = require('fs');
 const path = require('path');
 
 // Path to authentication database (separate from events database)
-const AUTH_DB_PATH = path.join(__dirname, '../database/auth.sqlite');
-const INIT_SQL_PATH = path.join(__dirname, '../database/init-auth.sql');
+const AUTH_DB_PATH = path.join(__dirname, 'database/auth.sqlite');
+const INIT_SQL_PATH = path.join(__dirname, 'database/init-auth.sql');
 
 /**
  * Initialize the authentication database
