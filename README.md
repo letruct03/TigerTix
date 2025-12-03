@@ -42,7 +42,7 @@ TigerTix employs a **microservices architecture** with four independent services
 
 ### Clone Repository
 ```bash
-git clone [YOUR_GITHUB_REPO_URL]
+git clone [GITHUB_REPO_URL]
 cd tigertix
 ```
 
