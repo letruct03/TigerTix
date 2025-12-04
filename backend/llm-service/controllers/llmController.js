@@ -5,9 +5,11 @@
 
 import fetch from "node-fetch";
 globalThis.fetch = fetch;
-const OpenAI = require("openai");
-const llmModel = require('../models/llmModel');
-require('dotenv').config();
+import OpenAI from "openai";
+import llmModel from "../models/llmModel.js";
+import dotenv from "dotenv";
+dotenv.config();
+
 
 
 /* Initialize client */
