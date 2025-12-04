@@ -12,7 +12,7 @@ require('dotenv').config();
 
 /* Initialize client */
 
-const openai = new OpenAI({ apiKey: "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"});
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY});
 
 /* Parse input and extract booking intent */
 const parseBookingIntent = async (req, res) => {
