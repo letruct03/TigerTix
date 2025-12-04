@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const clientRoutes = require('./routes/clientRoutes');
 const { getEvent } = require('../admin-service/controllers/adminController');
+const { getAllEvents } = require('./models/clientModel');
 
 const app = express();
 const PORT = process.env.PORT || 6001;
@@ -24,7 +25,7 @@ app.get('/', (req, res) => {
     res.json({
         message: 'Client Service is running',
         endpoints: {
-            getEvents: 'GET /api/events',
+            getAllEvents: 'GET /api/events',
             purchaseTicket: 'POST /api/events/:id/purchase',
             health: 'GET /health'
         }

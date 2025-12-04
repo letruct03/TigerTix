@@ -6,7 +6,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/authContext';
-import './Header.css';
+import'./Header.css';
 
 const Header = () => {
   const { user, logout } = useAuth();

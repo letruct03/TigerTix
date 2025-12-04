@@ -9,6 +9,7 @@ const { initializeDatabase } = require('./setup');
 const adminRoutes = require('./routes/adminRoutes');
 
 const app = express();
+app.use(express.json());
 const PORT = process.env.PORT || 5001;
 
 // Middleware

@@ -244,9 +244,10 @@ describe('Authentication Service', () => {
    */
   describe('POST /api/auth/refresh', () => {
     let freshRefreshToken;
-    const uniqueEmail = `refreshuser${Date.now()}@clemson.edu`;
+    let uniqueEmail;
     const password = 'Test123456';
-    beforeAll(async () => {
+    beforeEach(async () => {
+      uniqueEmail = `refreshuser${Date.now()}@clemson.edu`;
       const registerResp = await request(app)
       .post('/api/auth/register')
       .send({

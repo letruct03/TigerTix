@@ -17,7 +17,7 @@ describe('Admin Service', () => {
                 .send({name: 'event', date: '2025-12-31', total_tickets: 300})
                 .expect(201)
 
-            expect(req.body.total_tickets).toBe(300);
+            expect(req.body.event.total_tickets).toBe(300);
         });
 
         test('reject requests with unfilled required fields', async () => {
@@ -77,7 +77,7 @@ describe('Admin Service', () => {
                 .post('/api/admin/events')
                 .send({name: 'event', date: '2025-12-31', total_tickets: 300})
                 .expect(201)
-            const eventId = example.body.id;
+            const eventID = example.body.event.id;
             const response = await request(app)
                 .get(`/api/admin/events/${eventID}`)
                 .expect(200)
@@ -100,13 +100,13 @@ describe('Admin Service', () => {
                 .post('/api/admin/events')
                 .send({name: 'event', date: '2025-12-31', total_tickets: 300})
                 .expect(201)
-            const eventId = example.body.id;
+            const eventID = example.body.event.id;
             const response = await request(app)
                 .put(`/api/admin/events/${eventID}`)
                 .send({name: 'betterEvent'})
                 .expect(200)
 
-            expect(response.body.name).toBe('betterEvent');
+            expect(response.body.event.name).toBe('betterEvent');
             
 
         });
@@ -130,10 +130,11 @@ describe('Admin Service', () => {
                 .post('/api/admin/events')
                 .send({name: 'event', date: '2025-12-31', total_tickets: 300})
                 .expect(201)
+                const eventID = example.body.event.id;
             
 
             const response = await request(app)
-                .delete(`/api/admin/events/1`)
+                .delete(`/api/admin/events/${eventID}`)
                 .expect(200)
 
         });

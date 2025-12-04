@@ -4,6 +4,7 @@
  */
 
 const jwt = require('jsonwebtoken');
+const crypto = require("crypto");
 
 // JWT configuration
 const JWT_ACCESS_SECRET = process.env.JWT_ACCESS_SECRET || 'tigertix-access-secret-change-in-production';
@@ -43,7 +44,8 @@ const generateAccessToken = (payload) => {
 const generateRefreshToken = (payload) => {
   const tokenPayload = {
     userId: payload.userId,
-    type: 'refresh'
+    type: 'refresh',
+    jti: crypto.randomUUID()
   };
 
   const token = jwt.sign(tokenPayload, JWT_REFRESH_SECRET, {

@@ -3,6 +3,7 @@
  * tests admin-level input validation and basic functions
  * such as fetching, adding, removing, and editing events
  */
+const { createEvent } = require('../../admin-service/models/adminModel');
 const request = require('supertest');
 const app = require ('../server');
 
@@ -36,13 +37,19 @@ describe('Client Service', () => {
       .get('/api/events')
       .expect(200);
 
-    expect(Array.isArray(response.body)).toBe(true);
+    expect(Array.isArray(response.body.data)).toBe(true);
   });
 
   // POST /api/events/:id/purchase
   test('POST /api/events/:id/purchase should work', async () => {
+    const newEvent = await createEvent({
+      name: "Concert Night",
+      date: "2025-12-15",
+      total_tickets: 5,
+      price: 100
+    });
     const response = await request(app)
-      .post('/api/events/1/purchase')
+      .post(`/api/events/${newEvent.id}/purchase`)
       .send({ quantity: 1 })
       .expect(200);
 

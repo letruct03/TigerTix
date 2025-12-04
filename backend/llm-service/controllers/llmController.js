@@ -2,6 +2,9 @@
  * llmController.js - LLM service controller
  * Handles input for ticket booking
  */
+
+import fetch from "node-fetch";
+globalThis.fetch = fetch;
 const OpenAI = require("openai");
 const llmModel = require('../models/llmModel');
 require('dotenv').config();

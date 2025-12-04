@@ -14,6 +14,32 @@ import UserProfile from './components/UserProfile';
 import EventsPage from './components/EventsPage';
 import './App.css';
 
+export function AppContent() {
+  return (
+    <AuthProvider>
+      <div className="App">
+        <Header />
+        
+        <main>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/" element={<ProtectedRoute><EventsPage /></ProtectedRoute>} />
+            <Route path="/events" element={<ProtectedRoute><EventsPage /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </main>
+
+        <footer className="App-footer">
+          <p>© 2025 TigerTix - Clemson University</p>
+          <p className="sprint-info">Sprint 3: Multi-Layered Authentication</p>
+        </footer>
+      </div>
+    </AuthProvider>
+  );
+}
+
 function App() {
   return (
     <Router>
