@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const clientRoutes = require('./routes/clientRoutes');
-const { getEvent } = require('../admin-service/controllers/adminController');
 const { getAllEvents } = require('./models/clientModel');
 
 const app = express();

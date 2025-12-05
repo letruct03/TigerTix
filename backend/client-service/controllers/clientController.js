@@ -1,4 +1,3 @@
-const { getEventById } = require('../../admin-service/models/adminModel');
 const ClientModel = require('../models/clientModel');
 
 /**

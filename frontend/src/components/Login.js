@@ -3,7 +3,7 @@
  * Handles user authentication with email and password
  */
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/authContext';
 import './Auth.css';

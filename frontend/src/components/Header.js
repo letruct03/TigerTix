@@ -3,7 +3,7 @@
  * Shows user info when logged in, login/register buttons when not
  */
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/authContext';
 import'./Header.css';

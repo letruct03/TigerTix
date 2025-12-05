@@ -2,9 +2,7 @@
  * llmController.js - LLM service controller
  * Handles input for ticket booking
  */
-
-import fetch from "node-fetch";
-globalThis.fetch = fetch;
+import fetch from 'cross-fetch';
 import OpenAI from "openai";
 import llmModel from "../models/llmModel.js";
 import dotenv from "dotenv";
@@ -14,7 +12,7 @@ dotenv.config();
 
 /* Initialize client */
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY});
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY, fetch});
 
 /* Parse input and extract booking intent */
 const parseBookingIntent = async (req, res) => {
@@ -262,7 +260,7 @@ const getAvailableEvents = async (req, res) => {
   }
 };
 
-module.exports = {
+export {
   parseBookingIntent,
   confirmBooking,
   getAvailableEvents

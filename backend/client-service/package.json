@@ -1,7 +1,7 @@
 {
-  "name": "tigertix-admin-service",
+  "name": "tigertix-client-servicce",
   "version": "1.0.0",
-  "description": "TigerTix Admin Microservice - Event Management",
+  "description": "TigerTix client service - client Management",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -10,8 +10,7 @@
   },
   "keywords": [
     "tigertix",
-    "admin",
-    "events",
+    "client",
     "microservice"
   ],
   "author": "TigerTix Team",

@@ -5,8 +5,7 @@
 
 const request = require('supertest');
 const app = require('../server');
-const fetch = require('node-fetch');
-globalThis.fetch = fetch;
+
 
 describe('LLM Service API', () => {
   
