@@ -33,7 +33,9 @@ jobs:
 
       - name: Run tests
         run: npx jest
-
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAIKEY }}
+          apikey: ${{ secrets.OPENAIKEY }}
       - name: Deploy Frontend (if tests pass)
         run: npx vercel --prod --token ${{ secrets.VERCEL_TOKEN }}
         working-directory: ./frontend
