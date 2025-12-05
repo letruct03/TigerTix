@@ -52,12 +52,27 @@ cd backend
 npm install
 ```
 
-Start the backend server:
+Start the backend servers:
+Admin Server
 ```bash
-npm start
+cd backend/admin-service
+node server.js
 ```
-
-The backend will run on `http://localhost:5000`
+Client Server
+```bash
+cd backend/client-service
+node server.js
+```
+User Auth server
+```bash
+cd backend/user-authentication
+node server.js
+```
+LLM Server
+```bash
+cd backend/llm-service
+node server.js
+```
 
 ### Frontend Setup
 ```bash
@@ -67,6 +82,7 @@ npm install
 
 Start the frontend development server:
 ```bash
+cd frontend
 npm start
 ```
 
@@ -81,7 +97,7 @@ The frontend will run on `http://localhost:3000`
 | `JWT_SECRET` | Secret key for access tokens | `your_secret_key` |
 | `JWT_REFRESH_SECRET` | Secret key for refresh tokens | `your_refresh_secret` |
 | `DATABASE_URL` | SQLite database file path | `./database.sqlite` |
-| `LLM_API_KEY` | API key for LLM service | `sk-...` |
+| `OPENAI_API_KEY` | API key for LLM service | `sk-...` |
 | `NODE_ENV` | Environment (development/production) | `production` |
 
 ### Frontend Environment Variables
@@ -95,40 +111,17 @@ The frontend will run on `http://localhost:3000`
 
 ## 🧪 How to Run Regression Tests
 
-### Backend Tests
-```bash
-cd backend
-npm test
-```
+### Run all Tests from root
 
-Run tests with coverage:
 ```bash
-npm run test:coverage
+npx jest
 ```
+In root
 
-### Frontend Tests
-```bash
-cd frontend
-npm test
-```
-
-Run tests in CI mode:
-```bash
-npm test -- --ci --coverage
-```
-
-### Run All Tests (from root directory)
-```bash
-# Backend tests
-cd backend && npm test
-
-# Frontend tests
-cd frontend && npm test
-```
 
 ## 👥 Team Members
 
-- **Matthew Kingswood** - Frontend Developer, Authenication Implementation
+- **Matthew Kingswood** - Dubugger, Client Service
 - **Truc Le** - Scrum Master, Backend Developer, LLM Integration
 - **Owen Woodall** - Full-stack Developer, Testing
 
