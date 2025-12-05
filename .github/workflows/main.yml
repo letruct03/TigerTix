@@ -36,11 +36,3 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAIKEY }}
           apikey: ${{ secrets.OPENAIKEY }}
-      - name: Deploy Frontend (if tests pass)
-        run: npx vercel --prod --token ${{ secrets.VERCEL_TOKEN }}
-        working-directory: ./frontend
-
-      - name: Deploy Backend (if tests pass)
-        run: |
-          curl -X POST -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
-          https://api.render.com/deploy/srv-xxxxxx
