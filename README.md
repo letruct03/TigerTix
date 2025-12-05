@@ -10,7 +10,7 @@ TigerTix is a event management and ticketing platform designed for Clemson Unive
 - **Backend:** Node.js with Express.js
 - **Database:** SQLite
 - **Authentication:** JWT (JSON Web Tokens) with bcrypt password hashing
-- **LLM API:** Claude Anthropic
+- **LLM API:** openAI mini 4.0
 - **Testing:** Jest, Supertest, React Testing Library
 - **CI/CD:** GitHub Actions
 
